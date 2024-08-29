@@ -11,7 +11,7 @@ import 'global.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:math';
 
-List<String> buttonValues = ['W', 'w', 'X', 'x', 'v'];
+List<String> buttonValues = ['W', 'w', 'X', 'x', 'V'];
 
 void main() {
   runApp(MyApp());

@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'global.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -65,7 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   List<TextEditingController> buttonControllers = [];
-  List<String> buttonValues = ['W', 'w', 'X', 'x', 'v'];
+  List<String> buttonValues = ['W', 'w', 'X', 'x', 'V'];
 
   List<String> sensorNames = ['소리', '빛', '거리', 'X축', 'Y축', 'Z축'];
   List<TextEditingController> sensorControllers = [];
@@ -283,11 +283,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 buildButtonSettingsSection(getLocalizedValue('buttonSettings')),
                 buildsensorSettingsSection(getLocalizedValue('sensorSettings')),
+                SizedBox(height: 20), // 섹션과 링크 사이에 간격 추가
+                GestureDetector(
+                  onTap: () {
+                    // 링크 클릭 시 수행할 동작 (예: 웹 페이지 열기)
+                    launchPrivacyPolicyURL();
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 8.0), // 왼쪽에 8.0의 마진 추가
+                    child: Text(
+                      '개인정보처리방침',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  // 링크 열기 함수 정의
+  void launchPrivacyPolicyURL() async {
+    final Uri url = Uri.parse("https://www.codable.co.kr/privacy_app.html"); // 실제 개인정보처리방침 URL로 변경
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
   }
 }
