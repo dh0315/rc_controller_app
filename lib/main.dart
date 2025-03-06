@@ -55,7 +55,8 @@ Future<bool> checkAndRequestPermissions(BuildContext context) async {
     // 권한 중 하나라도 거부된 경우
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('권한이 거부되었습니다. 앱 설정에서 블루투스, 위치 권한을 허용해주세요.'),
+        content: Text(
+            '권한이 거부되었습니다. 안드로이드 설정 -> 애플리케이션 -> 권한에서 블루투스와 위치 권한을 허용해주세요.'),
       ),
     );
     return false;
@@ -283,21 +284,24 @@ class _UIState extends State<UI> {
     });
   }
 
+  void _startBluetoothTimer() {
+    // 타이머가 이미 실행 중인 경우 취소
+    _timer?.cancel();
+
+    // 새로운 타이머 시작
+    _timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) {
+      if (_isToggleOn) {
+        _sendMessage('O'); // 토글이 켜져있으면 'O' 전송
+      } else {
+        _sendMessage('o'); // 토글이 꺼져있으면 'o' 전송
+      }
+    });
+  }
+
   void _toggleButton(bool newValue) {
     setState(() {
       _isToggleOn = newValue;
     });
-
-    if (_isToggleOn) {
-      // 토글이 켜지면 타이머 시작
-      _timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) {
-        _sendMessage('O');
-      });
-    } else {
-      // 토글이 꺼지면 타이머 중지하고 'o' 신호 전송
-      _timer?.cancel();
-      _sendMessage('o');
-    }
   }
 
   @override
@@ -315,7 +319,7 @@ class _UIState extends State<UI> {
       try {
         _connection!.output.add(utf8.encode(message + "\r\n"));
         _connection!.output.allSent.then((_) {
-          // print('Sent: $message');
+          print('Sent: $message');
         });
       } catch (e) {
         // print('Error sending message: $e');
@@ -466,6 +470,10 @@ class _UIState extends State<UI> {
           }
         }
         saveRecentDevice(device);
+
+        // 블루투스 연결 성공 시 타이머 시작
+        _startBluetoothTimer();
+
         _showConnectionStatus(
             '${getLocalizedValue('bluetoothConnect')} ${device.name}');
         _connection?.input?.listen(_onDataReceived).onDone(() {
@@ -474,6 +482,10 @@ class _UIState extends State<UI> {
             _connectedDeviceName = '';
             _connection = null;
           });
+
+          // 블루투스 연결이 해제되면 타이머 중지
+          _timer?.cancel();
+
           _showConnectionStatus(
               '${getLocalizedValue('bluetoothDisconnect')} ${device.name}');
         });
@@ -508,32 +520,40 @@ class _UIState extends State<UI> {
   }
 
   void _sendJoystickCommand() {
-    String Command = '';
+    String command = '';
+    String String_speed = ''; // speed를 위한 문자열 변수
+    String String_degree = ''; // degree를 위한 문자열 변수
 
+    // speed 계산 및 'q'로 변환
+    int speed = min((_lastLeftY * 15).toInt().abs(), 10);
+    String_speed = speed == 10 ? 'q' : speed.toString();
+
+    // degree 계산 및 'q'로 변환
+    int degree = min((_lastRightX * 15).toInt().abs(), 10);
+    String_degree = degree == 10 ? 'q' : degree.toString();
+
+    // 왼쪽 조이스틱이 중립, 오른쪽 조이스틱이 움직일 때 (회전)
     if (_lastLeftY == 0 && _lastRightX != 0) {
-      Command = _lastRightX < 0 ? 'L' : 'R';
-      int degree = min((_lastRightX * 15).toInt().abs(), 9);
-      _sendMessage(degree.toString() + Command);
+      command = _lastRightX < 0 ? 'L' : 'R';
+      _sendMessage(String_degree + command); // degree에 따른 명령 전송
     }
 
+    // 왼쪽 조이스틱이 움직일 때 (전진 또는 후진)
     if (_lastLeftY != 0 && _lastRightX == 0) {
-      Command = _lastLeftY < 0 ? 'F' : 'B';
-      int speed = min((_lastLeftY * 15).toInt().abs(), 9);
-      _sendMessage(speed.toString() + Command);
+      command = _lastLeftY < 0 ? 'F' : 'B';
+      _sendMessage(String_speed + command); // speed에 따른 명령 전송
     }
-
-    int speed = min((_lastLeftY * 15).toInt().abs(), 9);
 
     // 대각선 방향 계산
     if (_lastLeftY != 0 && _lastRightX != 0) {
       if (_lastLeftY < 0 && _lastRightX < 0) {
-        _sendMessage(speed.toString() + 'G'); // 왼쪽 위
+        _sendMessage(String_speed + 'G'); // 왼쪽 위
       } else if (_lastLeftY < 0 && _lastRightX > 0) {
-        _sendMessage(speed.toString() + 'I'); // 오른쪽 위
+        _sendMessage(String_speed + 'I'); // 오른쪽 위
       } else if (_lastLeftY > 0 && _lastRightX < 0) {
-        _sendMessage(speed.toString() + 'H'); // 왼쪽 아래
+        _sendMessage(String_speed + 'H'); // 왼쪽 아래
       } else if (_lastLeftY > 0 && _lastRightX > 0) {
-        _sendMessage(speed.toString() + 'J'); // 오른쪽 아래
+        _sendMessage(String_speed + 'J'); // 오른쪽 아래
       }
     }
   }

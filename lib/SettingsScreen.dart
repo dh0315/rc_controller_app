@@ -20,6 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'buttonSettings': 'Button Settings',
         'button': 'Button',
         'reservedWords': 'Reserved words',
+        'stop': 'Stop',
         'forward': 'Forward',
         'backward': 'Backward',
         'right': 'Right',
@@ -42,6 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'buttonSettings': '버튼 설정',
         'button': '버튼',
         'reservedWords': '예약어',
+        'stop': '정지',
         'forward': '전진',
         'backward': '후진',
         'right': '우회전',
@@ -69,7 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   List<String> sensorNames = ['소리', '빛', '거리', 'X축', 'Y축', 'Z축'];
   List<TextEditingController> sensorControllers = [];
-  List<bool> sensorChecks = [true,true,true,true,true,true];
+  List<bool> sensorChecks = [true, true, true, true, true, true];
 
   @override
   void initState() {
@@ -87,7 +89,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
       }
     });
-    loadSettings();  // 설정 로드
+    loadSettings(); // 설정 로드
   }
 
   @override
@@ -101,9 +103,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    List<String> loadedButtonValues = prefs.getStringList('buttonValues') ?? ['W', 'w', 'X', 'x', 'v'];
+    List<String> loadedButtonValues =
+        prefs.getStringList('buttonValues') ?? ['W', 'w', 'X', 'x', 'v'];
     buttonValues = loadedButtonValues;
-    buttonControllers = buttonValues.map((value) => TextEditingController(text: value)).toList();
+    buttonControllers = buttonValues
+        .map((value) => TextEditingController(text: value))
+        .toList();
     setState(() {});
     loadsensorNames(prefs);
   }
@@ -114,7 +119,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void addButton() {
-    if (buttonControllers.length < 9) { // 최대 9개의 버튼만 허용
+    if (buttonControllers.length < 9) {
+      // 최대 9개의 버튼만 허용
       setState(() {
         int newButtonIndex = buttonControllers.length + 1; // 새 버튼의 번호
         buttonControllers.add(TextEditingController(text: '$newButtonIndex'));
@@ -123,12 +129,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       });
     } else {
       // 버튼 개수가 최대값에 도달했을 때 사용자에게 알림
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(getLocalizedValue('maxButton')),
-            duration: Duration(seconds: 1),
-          )
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(getLocalizedValue('maxButton')),
+        duration: Duration(seconds: 1),
+      ));
     }
   }
 
@@ -144,10 +148,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void loadsensorNames(SharedPreferences prefs) {
-    sensorNames = prefs.getStringList('sensorNames') ?? ['소리', '빛', '거리', 'X축', 'Y축', 'Z축'];
-    sensorControllers = sensorNames.map((name) => TextEditingController(text: name)).toList();
+    sensorNames = prefs.getStringList('sensorNames') ??
+        ['소리', '빛', '거리', 'X축', 'Y축', 'Z축'];
+    sensorControllers =
+        sensorNames.map((name) => TextEditingController(text: name)).toList();
     sensorChecks = List.generate(sensorNames.length, (index) {
-        return prefs.getBool('sensorCheck_$index') ?? true;
+      return prefs.getBool('sensorCheck_$index') ?? true;
     });
 
     setState(() {});
@@ -167,7 +173,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(title,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ...children,
           ],
         ),
@@ -185,7 +192,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: TextField(
                 controller: controller,
-                decoration: InputDecoration(labelText: '${getLocalizedValue('sensor')} ${idx + 1}'),
+                decoration: InputDecoration(
+                    labelText: '${getLocalizedValue('sensor')} ${idx + 1}'),
                 onChanged: (value) {
                   sensorNames[idx] = value;
                   savesensorNames();
@@ -209,8 +217,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ]);
   }
 
-
-
   Widget buildButtonSettingsSection(String title) {
     return buildSettingsSection(title, [
       ...buttonControllers.asMap().entries.map((entry) {
@@ -221,7 +227,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: TextField(
                 controller: controller,
-                decoration: InputDecoration(labelText: '${getLocalizedValue('button')} ${index + 1}'),
+                decoration: InputDecoration(
+                    labelText: '${getLocalizedValue('button')} ${index + 1}'),
                 onChanged: (value) {
                   buttonValues[index] = value;
                   saveButtonValues();
@@ -247,18 +254,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       Text(
         '\n'
-            '*${getLocalizedValue('reservedWords')}\n'
-            '${getLocalizedValue('forward')}: F\n'
-            '${getLocalizedValue('backward')}: B\n'
-            '${getLocalizedValue('right')}: R\n'
-            '${getLocalizedValue('left')}: L\n'
-            '${getLocalizedValue('leftUp')}: G\n'
-            '${getLocalizedValue('rightUp')}: I\n'
-            '${getLocalizedValue('leftDown')}: H\n'
-            '${getLocalizedValue('rightDown')}: J\n'
-            '${getLocalizedValue('sensorOn')}: O\n'
-            '${getLocalizedValue('sensorOff')}: o\n'
-            '${getLocalizedValue('speed')}: 0~9',
+        '*${getLocalizedValue('reservedWords')}\n'
+        '${getLocalizedValue('stop')}: S\n'
+        '${getLocalizedValue('forward')}: F\n'
+        '${getLocalizedValue('backward')}: B\n'
+        '${getLocalizedValue('right')}: R\n'
+        '${getLocalizedValue('left')}: L\n'
+        '${getLocalizedValue('leftUp')}: G\n'
+        '${getLocalizedValue('rightUp')}: I\n'
+        '${getLocalizedValue('leftDown')}: H\n'
+        '${getLocalizedValue('rightDown')}: J\n'
+        '${getLocalizedValue('sensorOn')}: O\n'
+        '${getLocalizedValue('sensorOff')}: o\n'
+        '${getLocalizedValue('speed')}: 0~9, q',
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
@@ -266,7 +274,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     ]);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -310,7 +317,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // 링크 열기 함수 정의
   void launchPrivacyPolicyURL() async {
-    final Uri url = Uri.parse("https://www.codable.co.kr/privacy_app.html"); // 실제 개인정보처리방침 URL로 변경
+    final Uri url = Uri.parse(
+        "https://www.codable.co.kr/privacy_app.html"); // 실제 개인정보처리방침 URL로 변경
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }

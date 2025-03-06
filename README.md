@@ -61,14 +61,8 @@ keytool -genkey -v -keystore codingschool.keystore -alias codingschool -keyalg R
 
 config.xml 파일을 열고 android-versionCode="정수값" 버전은 정수로 현재 설정 값보다 큰 숫자를 1씩 올리면서 프로덕션 빌드를 해야 합니다. (구글 정책)
 platforms/android 하위에 ant-build 폴더를 생성하고 키스토어 파일을 옮깁니다.
-프로덕션 빌드는 다음 명령을 사용합니다.
 
-```
-cordova build --release
-```
-
-정상적으로 빌드가 완료되면 platforms/android/app/build/outputs/bundle/release 폴더 하위에 app-release.aab 파일이 생성됩니다.
-다음 빌드한 app-release.aab 파일을 platforms/android/ant-build 폴더에 복사하고 다음 명령을 관리자 cmd에서 실행합니다.
+빌드한 app-release.aab 파일을 platforms/android/ant-build 폴더에 복사하고 다음 명령을 관리자 cmd에서 실행합니다.
 서명 시 비밀번호를 입력해야 합니다. 별도로 담당자나 대표님께 문의 바랍니다.
 
 ```
@@ -88,4 +82,4 @@ zipalign -v 4 app-release.aab app-release-signed.aab
 ## 5) 서명 된 앱을 구글 콘솔에서 업로드한다.
 
 app-release-signed.aab 파일을 구글 콘솔에 업로드하여 심사를 거쳐서 배포합니다.
-특정 이유로 거부 당하게 되면 수정 할 때 마다 새로운 번들을 만들어야 하는데 ./rc_controller_app/pubspec.yaml의 version: 1.0.0+"버전 숫자"를 1씩 증가시키고 1),2),3),4) 과정을 반복하면 됩니다.
+특정 이유로 거부 당하게 되면 수정 할 때 마다 새로운 번들을 만들어야 하는데 ./rc_controller_app/pubspec.yaml의 version: 1.0.0+1 (versionName+versionCode)를 1씩 증가시키고 1),2),3),4) 과정을 반복하면 됩니다.
